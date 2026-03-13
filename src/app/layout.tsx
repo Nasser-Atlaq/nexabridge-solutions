@@ -5,6 +5,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SmoothScroll } from "@/components/layout/SmoothScroll";
 import { ScrollToTop } from "@/components/ui/ScrollToTop";
+import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
 const syne = Syne({
@@ -67,6 +69,8 @@ export default function RootLayout({
           <main id="main">{children}</main>
           <Footer />
           <ScrollToTop />
+          <Analytics />
+          <SpeedInsights />
         </SmoothScroll>
       </body>
     </html>
