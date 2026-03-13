@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+html {
+  scroll-behavior: smooth;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: #050510;
+  --color-foreground: #e4e4e7;
+  --color-muted: #a1a1aa;
+  --color-card: rgba(255, 255, 255, 0.02);
+  --color-border: rgba(255, 255, 255, 0.06);
+  --color-accent-blue: #2563eb;
+  --color-accent-cyan: #06b6d4;
+  --color-accent-amber: #f59e0b;
+  --color-accent-violet: #8b5cf6;
+  --color-glow: rgba(6, 182, 212, 0.12);
+
+  --font-heading: var(--font-syne);
+  --font-body: var(--font-jakarta);
+  --font-mono: var(--font-jetbrains);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: #050510;
+  color: #e4e4e7;
+  font-family: var(--font-body), system-ui, sans-serif;
+  touch-action: manipulation;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading), system-ui, sans-serif;
+}
+
+::selection {
+  background: rgba(6, 182, 212, 0.3);
+  color: #f5f5f5;
+}
+
+/* ── Marquee keyframes ── */
+
+@keyframes marquee-left {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee-right {
+  0% {
+    transform: translateX(-50%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@utility animate-marquee-left {
+  animation: marquee-left 30s linear infinite;
+}
+
+@utility animate-marquee-right {
+  animation: marquee-right 30s linear infinite;
+}
+
+/* ── Orbit keyframes ── */
+
+@keyframes orbit-cw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes orbit-ccw {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes line-pulse {
+  0%, 100% { opacity: 0.06; }
+  50% { opacity: 0.18; }
+}
+
+@utility animate-orbit-cw-60 {
+  animation: orbit-cw 60s linear infinite;
+}
+
+@utility animate-orbit-ccw-60 {
+  animation: orbit-ccw 60s linear infinite;
+}
+
+@utility animate-orbit-cw-90 {
+  animation: orbit-cw 90s linear infinite;
+}
+
+@utility animate-orbit-ccw-90 {
+  animation: orbit-ccw 90s linear infinite;
+}
+
+@utility animate-orbit-cw-120 {
+  animation: orbit-cw 120s linear infinite;
+}
+
+@utility animate-orbit-ccw-120 {
+  animation: orbit-ccw 120s linear infinite;
+}
+
+@utility animate-line-pulse {
+  animation: line-pulse 3s ease-in-out infinite;
+}
+
+/* ── Hide scrollbar utility (mobile snap containers) ── */
+
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee-left,
+  .animate-marquee-right,
+  [class*="animate-orbit-"],
+  .animate-line-pulse {
+    animation: none;
+  }
 }
