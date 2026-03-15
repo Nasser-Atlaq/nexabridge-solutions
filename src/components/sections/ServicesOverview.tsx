@@ -27,7 +27,7 @@ export function ServicesOverview() {
           const isCyan = service.accent === "cyan";
           return (
             <BentoItem key={service.title} size={service.bentoSize}>
-              <Link href={service.href} className="block h-full cursor-pointer">
+              <Link href={service.href} className="block h-full cursor-pointer" aria-label={`Learn more about ${service.title}`}>
                 <div className="flex h-full flex-col">
                   <div
                     className={cn(

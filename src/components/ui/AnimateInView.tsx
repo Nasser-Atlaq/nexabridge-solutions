@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import { motion, type Variants } from "framer-motion";
 import { viewportOnce } from "@/lib/animations";
-import { cn } from "@/lib/utils";
 
 interface AnimateInViewProps {
   children: React.ReactNode;

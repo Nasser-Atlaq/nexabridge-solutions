@@ -508,8 +508,7 @@ export const TECH_CATEGORIES = [
 
 export const CONTACT_INFO: ContactInfo = {
   email: "hello@nexabridge.com",
-  phone: "+1 (555) 012-3456",
-  address: "123 Innovation Drive, San Francisco, CA 94105",
+  phone: "+7 (969) 207-6774",
 };
 
 export const CONTACT_FORM_SERVICES = [

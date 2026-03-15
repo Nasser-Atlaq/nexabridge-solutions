@@ -74,7 +74,6 @@ export function Footer() {
                   {CONTACT_INFO.phone}
                 </a>
               </li>
-              <li>{CONTACT_INFO.address}</li>
             </ul>
           </div>
         </div>

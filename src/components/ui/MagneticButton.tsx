@@ -25,7 +25,7 @@ export function MagneticButton({
   disabled,
   strength = 0.3,
 }: MagneticButtonProps) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLAnchorElement | HTMLButtonElement>(null);
   const [transform, setTransform] = useState({ x: 0, y: 0 });
 
   const handleMouseMove = (e: React.MouseEvent) => {
@@ -60,25 +60,33 @@ export function MagneticButton({
     className
   );
 
-  const inner = href ? (
-    <Link href={href} className={classes}>
-      {children}
-    </Link>
-  ) : (
-    <button type={type} className={classes} onClick={onClick} disabled={disabled}>
-      {children}
-    </button>
-  );
+  if (href) {
+    return (
+      <Link
+        ref={ref as React.Ref<HTMLAnchorElement>}
+        href={href}
+        className={classes}
+        style={style}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
+        {children}
+      </Link>
+    );
+  }
 
   return (
-    <div
-      ref={ref}
+    <button
+      ref={ref as React.Ref<HTMLButtonElement>}
+      type={type}
+      className={classes}
+      style={style}
+      onClick={onClick}
+      disabled={disabled}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
-      style={style}
-      className="inline-block"
     >
-      {inner}
-    </div>
+      {children}
+    </button>
   );
 }

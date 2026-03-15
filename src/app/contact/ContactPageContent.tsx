@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Send, CheckCircle } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Phone, Send, CheckCircle, ChevronDown } from "lucide-react";
 import { CONTACT_INFO, CONTACT_FORM_SERVICES } from "@/lib/constants";
 import { fadeUp, staggerContainer, staggerItem } from "@/lib/animations";
 import { SectionWrapper } from "@/components/layout/SectionWrapper";
@@ -56,6 +56,21 @@ export function ContactPageContent() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+  const [serviceOpen, setServiceOpen] = useState(false);
+  const serviceRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!serviceOpen) return;
+    function onClickOutside(e: MouseEvent) {
+      if (serviceRef.current && !serviceRef.current.contains(e.target as Node)) {
+        setServiceOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClickOutside);
+    return () => document.removeEventListener("mousedown", onClickOutside);
+  }, [serviceOpen]);
 
   function validate(): boolean {
     const newErrors: FormErrors = {};
@@ -70,10 +85,30 @@ export function ContactPageContent() {
     return Object.keys(newErrors).length === 0;
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (validate()) {
+    if (!validate()) return;
+
+    setSubmitting(true);
+    setSubmitError("");
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || "Something went wrong");
+      }
+
       setSubmitted(true);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Failed to send message. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
   }
 
@@ -204,22 +239,87 @@ export function ContactPageContent() {
                     />
                   </div>
 
-                  <div>
-                    <label htmlFor="service" className="mb-1.5 block text-xs font-medium text-zinc-400">
+                  <div ref={serviceRef} className="relative">
+                    <label id="service-label" className="mb-1.5 block text-xs font-medium text-zinc-400">
                       Service Interested In
                     </label>
-                    <select
-                      id="service"
-                      name="service"
-                      value={formData.service}
-                      onChange={handleChange}
-                      className={cn(inputBase, "cursor-pointer appearance-none")}
+                    <button
+                      type="button"
+                      role="combobox"
+                      aria-expanded={serviceOpen}
+                      aria-labelledby="service-label"
+                      aria-haspopup="listbox"
+                      aria-controls="service-listbox"
+                      onClick={() => setServiceOpen((prev) => !prev)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Escape") setServiceOpen(false);
+                        if (e.key === "ArrowDown" && !serviceOpen) {
+                          e.preventDefault();
+                          setServiceOpen(true);
+                        }
+                      }}
+                      className={cn(
+                        inputBase,
+                        "flex cursor-pointer items-center justify-between text-left",
+                        !formData.service && "text-zinc-600",
+                      )}
                     >
-                      <option value="">Select a service</option>
-                      {CONTACT_FORM_SERVICES.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
+                      <span className="truncate">
+                        {formData.service || "Select a service"}
+                      </span>
+                      <ChevronDown
+                        size={16}
+                        className={cn(
+                          "shrink-0 text-zinc-500 transition-transform duration-200",
+                          serviceOpen && "rotate-180",
+                        )}
+                      />
+                    </button>
+
+                    <AnimatePresence>
+                      {serviceOpen && (
+                        <motion.ul
+                          id="service-listbox"
+                          role="listbox"
+                          aria-labelledby="service-label"
+                          initial={{ opacity: 0, y: -4 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -4 }}
+                          transition={{ duration: 0.15 }}
+                          data-lenis-prevent
+                          className="absolute z-50 mt-1.5 max-h-56 w-full overflow-y-auto rounded-xl border border-white/[0.10] bg-[#0c0c1d] shadow-2xl shadow-black/40 backdrop-blur-xl"
+                        >
+                          {CONTACT_FORM_SERVICES.map((s) => (
+                            <li
+                              key={s}
+                              role="option"
+                              aria-selected={formData.service === s}
+                              tabIndex={0}
+                              onClick={() => {
+                                setFormData((prev) => ({ ...prev, service: s }));
+                                setServiceOpen(false);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter" || e.key === " ") {
+                                  e.preventDefault();
+                                  setFormData((prev) => ({ ...prev, service: s }));
+                                  setServiceOpen(false);
+                                }
+                                if (e.key === "Escape") setServiceOpen(false);
+                              }}
+                              className={cn(
+                                "cursor-pointer px-4 py-2.5 text-sm transition-colors first:rounded-t-xl last:rounded-b-xl",
+                                formData.service === s
+                                  ? "bg-cyan-500/15 text-cyan-300"
+                                  : "text-zinc-300 hover:bg-white/[0.06] hover:text-zinc-100",
+                              )}
+                            >
+                              {s}
+                            </li>
+                          ))}
+                        </motion.ul>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </div>
 
@@ -241,10 +341,14 @@ export function ContactPageContent() {
                   {errors.message && <p id="message-error" role="alert" aria-live="assertive" className="mt-1 text-xs text-red-400">{errors.message}</p>}
                 </div>
 
+                {submitError && (
+                  <p role="alert" className="mt-4 text-sm text-red-400">{submitError}</p>
+                )}
+
                 <div className="mt-6">
-                  <MagneticButton variant="amber" type="submit">
-                    Send Message
-                    <Send size={15} />
+                  <MagneticButton variant="amber" type="submit" disabled={submitting}>
+                    {submitting ? "Sending..." : "Send Message"}
+                    {!submitting && <Send size={15} />}
                   </MagneticButton>
                 </div>
               </form>
@@ -280,13 +384,6 @@ export function ContactPageContent() {
                     >
                       {CONTACT_INFO.phone}
                     </a>
-                  </div>
-                </li>
-                <li className="flex items-start gap-3">
-                  <MapPin size={17} className="mt-0.5 shrink-0 text-cyan-400" />
-                  <div>
-                    <p className="text-xs text-zinc-400">Office</p>
-                    <p className="text-sm text-zinc-300">{CONTACT_INFO.address}</p>
                   </div>
                 </li>
               </ul>

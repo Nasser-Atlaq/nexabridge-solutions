@@ -60,7 +60,6 @@ export interface CoreValue {
 export interface ContactInfo {
   email: string;
   phone: string;
-  address: string;
 }
 
 // ── Engineering Capabilities ────────────────────────────────────────────────

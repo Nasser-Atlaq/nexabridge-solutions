@@ -33,7 +33,10 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://nexabridge.com";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "NexaBridge Solutions — Bridging Ideas to Innovation",
     template: "%s | NexaBridge Solutions",
@@ -46,6 +49,18 @@ export const metadata: Metadata = {
       "Custom software development, AI automation, and IT consulting for startups, SMBs, and enterprises.",
     type: "website",
     locale: "en_US",
+    siteName: "NexaBridge Solutions",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "NexaBridge Solutions — Bridging Ideas to Innovation",
+    description:
+      "Custom software development, AI automation, and IT consulting for startups, SMBs, and enterprises.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
   },
 };
 
@@ -57,6 +72,27 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${syne.variable} ${jakarta.variable} ${jetbrains.variable}`}>
       <body className="min-h-screen bg-[#050510] text-zinc-100 antialiased touch-action-manipulation">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Organization",
+              name: "NexaBridge Solutions",
+              url: SITE_URL,
+              logo: `${SITE_URL}/icon.svg`,
+              description:
+                "Custom software development, AI automation, and IT consulting for startups, SMBs, and enterprises.",
+              contactPoint: {
+                "@type": "ContactPoint",
+                email: "hello@nexabridge.com",
+                telephone: "+79692076774",
+                contactType: "sales",
+              },
+              sameAs: [],
+            }),
+          }}
+        />
         <SmoothScroll>
           <BackgroundEffects />
           <a

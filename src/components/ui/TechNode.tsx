@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useCallback, useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import type { TechStackItem } from "@/lib/types";
@@ -60,37 +60,42 @@ export function TechNode({
   const [showTooltip, setShowTooltip] = useState(false);
   const accent = ACCENT_CLASSES[tech.accent];
 
-  const updateProximity = useCallback(() => {
-    if (isMobile || !nodeRef.current || !containerRef.current || !mousePos.current) return;
-
-    const nodeRect = nodeRef.current.getBoundingClientRect();
-    const nodeCenterX = nodeRect.left + nodeRect.width / 2;
-    const nodeCenterY = nodeRect.top + nodeRect.height / 2;
-
-    const dx = mousePos.current.x - nodeCenterX;
-    const dy = mousePos.current.y - nodeCenterY;
-    const dist = Math.sqrt(dx * dx + dy * dy);
-
-    const RADIUS = 150;
-    const MAX_OFFSET = 12;
-
-    if (dist < RADIUS && dist > 0) {
-      const strength = (1 - dist / RADIUS) * MAX_OFFSET;
-      const ox = (dx / dist) * strength;
-      const oy = (dy / dist) * strength;
-      nodeRef.current.style.translate = `${ox}px ${oy}px`;
-    } else {
-      nodeRef.current.style.translate = "0px 0px";
-    }
-
-    rafRef.current = requestAnimationFrame(updateProximity);
-  }, [isMobile, mousePos, containerRef]);
-
   useEffect(() => {
     if (isMobile) return;
-    rafRef.current = requestAnimationFrame(updateProximity);
-    return () => cancelAnimationFrame(rafRef.current);
-  }, [updateProximity, isMobile]);
+    let active = true;
+
+    const loop = () => {
+      if (!active || !nodeRef.current || !containerRef.current || !mousePos.current) return;
+
+      const nodeRect = nodeRef.current.getBoundingClientRect();
+      const nodeCenterX = nodeRect.left + nodeRect.width / 2;
+      const nodeCenterY = nodeRect.top + nodeRect.height / 2;
+
+      const dx = mousePos.current.x - nodeCenterX;
+      const dy = mousePos.current.y - nodeCenterY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      const RADIUS = 150;
+      const MAX_OFFSET = 12;
+
+      if (dist < RADIUS && dist > 0) {
+        const strength = (1 - dist / RADIUS) * MAX_OFFSET;
+        const ox = (dx / dist) * strength;
+        const oy = (dy / dist) * strength;
+        nodeRef.current.style.translate = `${ox}px ${oy}px`;
+      } else {
+        nodeRef.current.style.translate = "0px 0px";
+      }
+
+      rafRef.current = requestAnimationFrame(loop);
+    };
+
+    rafRef.current = requestAnimationFrame(loop);
+    return () => {
+      active = false;
+      cancelAnimationFrame(rafRef.current);
+    };
+  }, [isMobile, mousePos, containerRef]);
 
   const handleInteraction = () => {
     if (isMobile) setShowTooltip((prev) => !prev);
@@ -114,7 +119,14 @@ export function TechNode({
         onMouseEnter={() => !isMobile && setShowTooltip(true)}
         onMouseLeave={() => !isMobile && setShowTooltip(false)}
         onClick={handleInteraction}
-        role="img"
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleInteraction();
+          }
+        }}
+        tabIndex={0}
+        role="button"
         aria-label={`${tech.name}: ${tech.description}`}
       >
         <span className={cn("text-[11px] font-bold leading-none select-none", accent.text)}>

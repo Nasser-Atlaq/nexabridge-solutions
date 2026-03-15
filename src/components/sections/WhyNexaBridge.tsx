@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useSyncExternalStore } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { FEATURE_HIGHLIGHTS } from "@/lib/constants";
@@ -15,18 +15,16 @@ export function WhyNexaBridge() {
   const containerRef = useRef<HTMLDivElement>(null);
   const panelsRef = useRef<HTMLDivElement>(null);
   const isReduced = useRef(false);
-  const [isDesktop, setIsDesktop] = useState(true);
+  const isDesktop = useSyncExternalStore(
+    useCallback((cb: () => void) => {
+      const mql = window.matchMedia("(min-width: 1024px)");
+      mql.addEventListener("change", cb);
+      return () => mql.removeEventListener("change", cb);
+    }, []),
+    () => window.matchMedia("(min-width: 1024px)").matches,
+    () => true,
+  );
   const [activeIndex, setActiveIndex] = useState(0);
-
-  // Track breakpoint
-  useEffect(() => {
-    const mql = window.matchMedia("(min-width: 1024px)");
-    setIsDesktop(mql.matches);
-
-    const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
-    mql.addEventListener("change", handler);
-    return () => mql.removeEventListener("change", handler);
-  }, []);
 
   // GSAP horizontal scroll — desktop only
   useEffect(() => {

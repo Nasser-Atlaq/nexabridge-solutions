@@ -24,53 +24,37 @@ export function TextReveal({
   trigger = "mount",
 }: TextRevealProps) {
   const containerRef = useRef<HTMLElement>(null);
+  const charRefs = useRef<HTMLSpanElement[]>([]);
   const hasAnimated = useRef(false);
+
+  const words = children.split(" ");
 
   useEffect(() => {
     if (!containerRef.current || hasAnimated.current) return;
 
-    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const prefersReducedMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
     if (prefersReducedMotion) {
       containerRef.current.style.visibility = "visible";
+      charRefs.current.forEach((span) => {
+        if (span) {
+          span.style.opacity = "1";
+          span.style.transform = "none";
+        }
+      });
       return;
     }
 
     const el = containerRef.current;
-    const text = children;
-    el.textContent = "";
     el.style.visibility = "visible";
 
-    const words = text.split(" ");
-    const charSpans: HTMLSpanElement[] = [];
-
-    words.forEach((word, wordIdx) => {
-      const wordWrapper = document.createElement("span");
-      wordWrapper.style.display = "inline-block";
-      wordWrapper.style.whiteSpace = "nowrap";
-
-      word.split("").forEach((char) => {
-        const span = document.createElement("span");
-        span.textContent = char;
-        span.style.display = "inline-block";
-        span.style.opacity = "0";
-        span.style.transform = "translateY(24px)";
-        wordWrapper.appendChild(span);
-        charSpans.push(span);
-      });
-
-      el.appendChild(wordWrapper);
-
-      if (wordIdx < words.length - 1) {
-        const space = document.createElement("span");
-        space.innerHTML = "&nbsp;";
-        space.style.display = "inline-block";
-        el.appendChild(space);
-      }
-    });
+    const chars = charRefs.current.filter(Boolean);
 
     const animate = () => {
       hasAnimated.current = true;
-      gsap.to(charSpans, {
+      gsap.to(chars, {
         opacity: 1,
         y: 0,
         duration: 0.5,
@@ -92,10 +76,8 @@ export function TextReveal({
     }
 
     const safetyTimer = setTimeout(() => {
-      if (!hasAnimated.current && containerRef.current) {
-        containerRef.current.style.visibility = "visible";
-        containerRef.current.style.opacity = "1";
-        charSpans.forEach((span) => {
+      if (!hasAnimated.current) {
+        chars.forEach((span) => {
           span.style.opacity = "1";
           span.style.transform = "translateY(0)";
         });
@@ -110,13 +92,44 @@ export function TextReveal({
     };
   }, [children, delay, stagger, trigger]);
 
+  let charIndex = 0;
+
   return (
     <Tag
       ref={containerRef as React.RefObject<never>}
       className={className}
       style={{ visibility: "hidden" }}
+      aria-label={children}
     >
-      {children}
+      {words.map((word, wordIdx) => (
+        <span
+          key={wordIdx}
+          style={{ display: "inline-block", whiteSpace: "nowrap" }}
+        >
+          {word.split("").map((char) => {
+            const idx = charIndex++;
+            return (
+              <span
+                key={idx}
+                ref={(el) => {
+                  if (el) charRefs.current[idx] = el;
+                }}
+                aria-hidden="true"
+                style={{
+                  display: "inline-block",
+                  opacity: 0,
+                  transform: "translateY(24px)",
+                }}
+              >
+                {char}
+              </span>
+            );
+          })}
+          {wordIdx < words.length - 1 && (
+            <span style={{ display: "inline-block" }}>&nbsp;</span>
+          )}
+        </span>
+      ))}
     </Tag>
   );
 }
