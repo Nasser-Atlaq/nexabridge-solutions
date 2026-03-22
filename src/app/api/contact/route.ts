@@ -22,7 +22,7 @@ export async function POST(request: Request) {
     // const resend = new Resend(process.env.RESEND_API_KEY);
     // await resend.emails.send({
     //   from: "NexaBridge <noreply@nexabridge.com>",
-    //   to: process.env.CONTACT_EMAIL || "hello@nexabridge.com",
+    //   to: process.env.CONTACT_EMAIL || "nexabridge.teck@gmail.com",
     //   subject: `New inquiry from ${name} — ${service || "General"}`,
     //   text: `Name: ${name}\nEmail: ${email}\nCompany: ${company || "N/A"}\nService: ${service || "N/A"}\n\n${message}`,
     // });

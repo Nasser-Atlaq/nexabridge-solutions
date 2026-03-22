@@ -507,7 +507,7 @@ export const TECH_CATEGORIES = [
 // ── Contact ─────────────────────────────────────────────────────────────────
 
 export const CONTACT_INFO: ContactInfo = {
-  email: "hello@nexabridge.com",
+  email: "nexabridge.teck@gmail.com",
   phone: "+7 (969) 207-6774",
 };
 

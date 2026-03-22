@@ -149,7 +149,8 @@ Generate all website content autonomously. No placeholder text ("Lorem ipsum", "
 - **Target**: Startups, SMBs, enterprises seeking technology partners
 - **Mission**: Empower businesses with technology that drives growth, efficiency, and competitive advantage
 - **Vision**: Most trusted technology partner worldwide — known for quality, innovation, and lasting impact
-- **Contact**: hello@nexabridge.com, +1 (555) 012-3456, 123 Innovation Drive, San Francisco, CA 94105
+- **Contact**: nexabridge.teck@gmail.com, +7 (969) 207-6774
+- **Location**: Fully remote / virtual — no physical office. Serves clients worldwide.
 
 ### Services
 

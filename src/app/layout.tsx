@@ -85,10 +85,11 @@ export default function RootLayout({
                 "Custom software development, AI automation, and IT consulting for startups, SMBs, and enterprises.",
               contactPoint: {
                 "@type": "ContactPoint",
-                email: "hello@nexabridge.com",
+                email: "nexabridge.teck@gmail.com",
                 telephone: "+79692076774",
                 contactType: "sales",
               },
+              areaServed: "Worldwide",
               sameAs: [],
             }),
           }}
