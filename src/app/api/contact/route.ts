@@ -1,4 +1,26 @@
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
+
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+function formatEmailBody(
+  name: string,
+  email: string,
+  company: string | undefined,
+  service: string | undefined,
+  message: string,
+): string {
+  return [
+    `Name: ${name}`,
+    `Email: ${email}`,
+    company ? `Company: ${company}` : null,
+    service ? `Service: ${service}` : null,
+    "",
+    message,
+  ]
+    .filter((line) => line !== null)
+    .join("\n");
+}
 
 export async function POST(request: Request) {
   try {
@@ -15,24 +37,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 
-    // TODO: Integrate email service (Resend, SendGrid, AWS SES, etc.)
-    // Example with Resend:
-    //
-    // import { Resend } from "resend";
-    // const resend = new Resend(process.env.RESEND_API_KEY);
-    // await resend.emails.send({
-    //   from: "NexaBridge <noreply@nexabridge.com>",
-    //   to: process.env.CONTACT_EMAIL || "nexabridge.teck@gmail.com",
-    //   subject: `New inquiry from ${name} — ${service || "General"}`,
-    //   text: `Name: ${name}\nEmail: ${email}\nCompany: ${company || "N/A"}\nService: ${service || "N/A"}\n\n${message}`,
-    // });
-
-    console.log("Contact form submission:", { name, email, company, service, message });
+    await resend.emails.send({
+      from: "NexaBridge <onboarding@resend.dev>",
+      to: "nexabridge.teck@gmail.com",
+      replyTo: email,
+      subject: `New inquiry from ${name} — ${service || "General"}`,
+      text: formatEmailBody(name, email, company, service, message),
+    });
 
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json(
-      { error: "Failed to process request" },
+      { error: "Failed to send message. Please try again." },
       { status: 500 },
     );
   }
